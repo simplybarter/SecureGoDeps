@@ -1,29 +1,52 @@
-# SecureGoDeps Integration Examples
+# 🛠️ SecureGoDeps Examples & Integrations
 
-This directory contains integration examples for utilizing the `SecureGoDeps` scanning tool within your CI/CD pipelines.
+This directory contains example configurations, test modules, and CI/CD pipelines to help you integrate `SecureGoDeps` into your projects.
 
-## Contents
-
-- [`testing/`](testing/): A test Go module containing an older, vulnerable dependency configuration to demonstrate vulnerability identification and resolution.
-- [`github/workflows/go-security-check.yml`](github/workflows/go-security-check.yml): A complete GitHub Actions workflow configured to run the dependency vulnerability scanner.
 ---
 
-## Local Testing / Verification
+## 📂 Directory Layout
 
-This directory includes a `testing/` folder containing a simple Go module pre-configured with a vulnerable dependency (`golang.org/x/text` version `v0.3.5` or `v0.35.0`).
-
-To run a test scan (from the root of the repository):
-```bash
-./scripts/secure-go-deps.sh --path ./examples/testing
+```
+examples/
+├── github/
+│   └── workflows/
+│       └── go-security-check.yml  # Sample GitHub Actions workflow
+└── testing/
+    ├── go.mod                     # Vulnerable test Go module
+    ├── go.sum                     # Vulnerable test Go checksums
+    └── main.go                    # Entrypoint importing vulnerable package
 ```
 
 ---
 
-## GitHub Actions CI/CD Integration
+## 🧪 Local Testing / Verification
 
-The provided GitHub Actions workflow automates the process of checking your Go codebase for reachable vulnerabilities, automatically upgrading dependencies if any are detected, and validating module integrity.
+To verify that the automatic scanning and remediation works as intended, you can run `secure-go-deps.sh` against the pre-configured `testing` folder.
+
+This test module includes an outdated, vulnerable dependency (`golang.org/x/text` version `v0.35.0` or similar) to trigger `govulncheck`.
+
+### Run Test Scan
+
+From the root of the repository, execute:
+```bash
+./scripts/secure-go-deps.sh --path ./examples/testing
+```
+
+> [!TIP]
+> Run with the `--dry-run` flag first to preview proposed dependency updates without writing changes:
+> ```bash
+> ./scripts/secure-go-deps.sh --path ./examples/testing --dry-run
+> ```
+
+---
+
+## 🤖 GitHub Actions CI/CD Integration
+
+Automate vulnerability detection and remediation by setting up a scheduled run or pull-request gate in your target repository.
 
 ### Workflow Configuration
+
+The sample workflow is located in [`github/workflows/go-security-check.yml`](github/workflows/go-security-check.yml):
 
 ```yaml
 name: Go Security Check
@@ -54,19 +77,14 @@ jobs:
 
 ### Setup Steps for Your Repository
 
-1. **Copy the workflow file**: Copy the `go-security-check.yml` workflow into your target repository at `.github/workflows/go-security-check.yml`.
-2. **Add the script**: Copy the `secure-go-deps.sh` script to your repository under `scripts/secure-go-deps.sh` (or update the path in the workflow file accordingly).
-3. **Verify Go module path**:
-   - If your `go.mod` is in the repository root, `go-version-file: go.mod` works out of the box.
-   - If your Go code/module is in a subdirectory (e.g. `src/` or `backend/`), update the `setup-go` action's configuration:
-     ```yaml
-     - uses: actions/setup-go@v5
-       with:
-         go-version-file: backend/go.mod
-     ```
-   - Also, update the runner script call to pass the target directory path using the `-p` or `--path` option:
-     ```yaml
-     run: |
-       chmod +x scripts/secure-go-deps.sh
-       ./scripts/secure-go-deps.sh --path ./backend
-     ```
+1. **Stash the workflow**: Copy `go-security-check.yml` into your target repository's `.github/workflows/` folder.
+2. **Include the script**: Copy `secure-go-deps.sh` to `scripts/secure-go-deps.sh` in your target repository.
+3. **Verify paths**:
+    * If your `go.mod` is in a subdirectory (e.g. `src/` or `backend/`), modify the `go-version-file` input:
+      ```yaml
+      go-version-file: backend/go.mod
+      ```
+    * Update the execution script step in the workflow to pass the corresponding directory:
+      ```yaml
+      ./scripts/secure-go-deps.sh --path ./backend
+      ```
