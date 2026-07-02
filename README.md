@@ -65,7 +65,7 @@ graph TD
 No heavy setup required. Copy or clone this utility to your project:
 
 ```bash
-git clone https://github.com/your-username/SecureGoDeps.git
+git clone https://github.com/simplybarter/SecureGoDeps.git
 cd SecureGoDeps
 ```
 
