@@ -13,7 +13,8 @@
 
 ## ⚠️ Dependency housekeeping WARNING
 
-You nolonger have an excuse for deploying vulnerable Go dependecies in your code. This repo provides an easy to use CLI tool to scan and remediate vulnerabilties in your code. 
+You nolonger have an excuse for deploying vulnerable Go dependecies in your code. This repo provides an easy to use CLI tool to scan and remediate vulnerabilties in your code.
+
 ---
 
 ## ⚡ How It Works
