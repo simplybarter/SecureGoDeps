@@ -1,0 +1,18 @@
+# Handle line endings automatically for files detected as text
+# and leave binary files untouched.
+* text=auto
+
+# Force LF line endings for shell scripts and ensure they're treated as text
+*.sh text eol=lf
+
+# Force LF line endings for Go code, configurations, and checksums
+*.go text eol=lf
+go.mod text eol=lf
+go.sum text eol=lf
+
+# Force LF line endings for Markdown and documentation
+*.md text eol=lf
+
+# Force LF line endings for YAML configurations
+*.yml text eol=lf
+*.yaml text eol=lf
