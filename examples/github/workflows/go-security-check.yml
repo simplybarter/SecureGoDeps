@@ -1,0 +1,24 @@
+name: Go Security Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * *"
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run security dependency script
+        run: |
+          chmod +x scripts/secure-go-deps.sh
+          ./scripts/secure-go-deps.sh
