@@ -27,7 +27,7 @@ examples/
 
 To verify that the automatic scanning and remediation works as intended, you can run `secure-go-deps.sh` against the pre-configured `testing` folder.
 
-This test module includes an outdated, vulnerable dependency (`golang.org/x/text` version `v0.35.0` or similar) to trigger `govulncheck`.
+This test module includes an outdated, vulnerable dependency (`golang.org/x/text` version `v0.3.5`) to trigger `govulncheck`.
 
 ### Run Test Scan
 
