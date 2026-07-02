@@ -82,8 +82,11 @@ jobs:
 ### Setup Steps for Your Repository
 
 1. **Stash the workflow**: Copy `go-security-check.yml` into your target repository's `.github/workflows/` folder.
-2. **Include the script**: Copy `secure-go-deps.sh` to `scripts/secure-go-deps.sh` in your target repository.
-3. **Verify paths**:
+2. **Add issue & pull request templates**: Copy `PULL_REQUEST_TEMPLATE.md` and the `ISSUE_TEMPLATE/` folder into your target repository's `.github/` folder:
+    * `examples/github/PULL_REQUEST_TEMPLATE.md` -> `.github/PULL_REQUEST_TEMPLATE.md`
+    * `examples/github/ISSUE_TEMPLATE/` -> `.github/ISSUE_TEMPLATE/`
+3. **Include the script**: Copy `secure-go-deps.sh` to `scripts/secure-go-deps.sh` in your target repository.
+4. **Verify paths**:
     * If your `go.mod` is in a subdirectory (e.g. `src/` or `backend/`), modify the `go-version-file` input:
       ```yaml
       go-version-file: backend/go.mod
