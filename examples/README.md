@@ -9,6 +9,10 @@ This directory contains example configurations, test modules, and CI/CD pipeline
 ```
 examples/
 ├── github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md          # Sample bug report template
+│   │   └── feature_request.md     # Sample feature request template
+│   ├── PULL_REQUEST_TEMPLATE.md   # Sample PR template
 │   └── workflows/
 │       └── go-security-check.yml  # Sample GitHub Actions workflow
 └── testing/
