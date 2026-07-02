@@ -15,6 +15,41 @@ set -euo pipefail
 TARGET_PATH=""
 DRY_RUN=false
 
+# Color support setup
+if [[ -t 1 ]]; then
+  NC='\033[0m'
+  RED='\033[0;31m'
+  GREEN='\033[0;32m'
+  YELLOW='\033[0;33m'
+  BLUE='\033[0;34m'
+  CYAN='\033[0;36m'
+  BOLD='\033[1m'
+else
+  NC=''
+  RED=''
+  GREEN=''
+  YELLOW=''
+  BLUE=''
+  CYAN=''
+  BOLD=''
+fi
+
+log_info() {
+  echo -e "${BLUE}==>${NC} ${BOLD}$1${NC}"
+}
+
+log_success() {
+  echo -e "${GREEN}==>${NC} ${BOLD}$1${NC}"
+}
+
+log_warn() {
+  echo -e "${YELLOW}==>${NC} ${BOLD}$1${NC}"
+}
+
+log_error() {
+  echo -e "${RED}ERROR:${NC} $1" >&2
+}
+
 usage() {
   cat <<EOF
 Usage:
@@ -37,7 +72,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -p|--path)
       if [[ $# -lt 2 ]]; then
-        echo "ERROR: --path requires a value."
+        log_error "--path requires a value."
         usage
         exit 1
       fi
@@ -53,7 +88,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     *)
-      echo "ERROR: Unknown argument: $1"
+      log_error "Unknown argument: $1"
       usage
       exit 1
       ;;
@@ -62,7 +97,7 @@ done
 
 if [[ -n "$TARGET_PATH" ]]; then
   if [[ ! -d "$TARGET_PATH" ]]; then
-    echo "ERROR: Path does not exist or is not a directory: $TARGET_PATH"
+    log_error "Path does not exist or is not a directory: $TARGET_PATH"
     exit 1
   fi
 
@@ -73,27 +108,27 @@ else
   cd "$ROOT_DIR"
 fi
 
-echo "==> Using project directory: $(pwd)"
-echo "==> Checking this is a Go module repo..."
+log_info "Using project directory: $(pwd)"
+log_info "Checking this is a Go module repo..."
 
 if [[ ! -f "go.mod" ]]; then
-  echo "ERROR: go.mod not found in $(pwd)."
-  echo "Run this from the root of a Go module repo or pass --path."
+  log_error "go.mod not found in $(pwd)."
+  log_error "Run this from the root of a Go module repo or pass --path."
   exit 1
 fi
 
-echo "==> Installing/updating govulncheck..."
+log_info "Installing/updating govulncheck..."
 
 go install golang.org/x/vuln/cmd/govulncheck@latest
 
 GOVULNCHECK="$(go env GOPATH)/bin/govulncheck"
 
 if [[ ! -x "$GOVULNCHECK" ]]; then
-  echo "ERROR: govulncheck was not found at $GOVULNCHECK"
+  log_error "govulncheck was not found at $GOVULNCHECK"
   exit 1
 fi
 
-echo "==> Running initial vulnerability scan..."
+log_info "Running initial vulnerability scan..."
 
 set +e
 "$GOVULNCHECK" ./...
@@ -101,25 +136,25 @@ INITIAL_STATUS=$?
 set -e
 
 if [[ "$INITIAL_STATUS" -eq 0 ]]; then
-  echo "==> No known reachable vulnerabilities found."
+  log_success "No known reachable vulnerabilities found."
   if [[ "$DRY_RUN" = true ]]; then
-    echo "==> Done. [DRY RUN] No changes needed."
+    log_success "Done. [DRY RUN] No changes needed."
     exit 0
   fi
-  echo "==> Running go mod tidy and tests anyway..."
+  log_info "Running go mod tidy and tests anyway..."
 
   go mod tidy
   go test ./...
 
-  echo "==> Done. Repo passed vulnerability scan and tests."
+  log_success "Done. Repo passed vulnerability scan and tests."
   exit 0
 fi
 
 echo
-echo "==> Vulnerabilities were found."
+log_warn "Vulnerabilities were found."
 
 if [[ "$DRY_RUN" = true ]]; then
-  echo "==> [DRY RUN] Simulating dependency upgrades..."
+  log_warn "[DRY RUN] Simulating dependency upgrades..."
   echo
 
   # Create backups
@@ -146,7 +181,7 @@ if [[ "$DRY_RUN" = true ]]; then
   go get -u ./... >/dev/null 2>&1
   go mod tidy >/dev/null 2>&1
 
-  echo "==> Proposed changes to go.mod:"
+  log_info "Proposed changes to go.mod:"
   echo "------------------------------------------------------------"
   diff -u go.mod.tmp go.mod || true
   echo "------------------------------------------------------------"
@@ -158,26 +193,26 @@ if [[ "$DRY_RUN" = true ]]; then
   set -e
 
   echo
-  echo "==> [DRY RUN] Simulation complete. No files were modified."
+  log_success "[DRY RUN] Simulation complete. No files were modified."
   exit 0
 fi
 
-echo "==> Attempting to upgrade all direct and indirect dependencies..."
+log_info "Attempting to upgrade all direct and indirect dependencies..."
 echo
 
 go get -u ./...
 
-echo "==> Tidying module files..."
+log_info "Tidying module files..."
 
 go mod tidy
 
-echo "==> Running tests after dependency upgrades..."
+log_info "Running tests after dependency upgrades..."
 
 go test ./...
 
-echo "==> Running final vulnerability scan..."
+log_info "Running final vulnerability scan..."
 
 "$GOVULNCHECK" ./...
 
 echo
-echo "==> Done. Dependencies were upgraded, tests passed, and govulncheck passed."
+log_success "Done. Dependencies were upgraded, tests passed, and govulncheck passed."
